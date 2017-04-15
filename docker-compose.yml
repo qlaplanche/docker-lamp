@@ -1,18 +1,36 @@
 version: '2'
 services:
-  mysql:
-    build: ./mysql
+  sql_db:
+    container_name: mariadb
+    image: mariadb:latest
     environment:
-      MYSQL_ROOT_PASSWORD: pass
+      MYSQL_ROOT_PASSWORD: root
     volumes:
       - db:/var/lib/mysql
+
   php:
-    build: ./php
+    container_name: php-apache
+    build: ./.docker/php
     ports:
-      - '80:80'
+      - 8080:80
     volumes:
       - ./html:/var/www/html
     depends_on:
-      - mysql
+      - sql_db
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      PMA_HOST: sql_db
+    restart: always
+    ports:
+     - 8081:80
+    volumes:
+     - /sessions
+
 volumes:
   db:
+    driver: local
